@@ -117,12 +117,15 @@ public class Helper {
 
     public static boolean startsWithHTTPMethod(String request) {
         if(request == null){
+            System.out.println("Request is null");
             return false;
         }
-        String req = request.substring(0, request.indexOf("/"));
+        String req = request.substring(0, request.indexOf("/")).trim();
         if(getMethod(req) != null){
+            System.out.println("Request starts with HTTP method: " + req);
             return true;
         }
+        System.out.println("Request does not start with HTTP method: " + req);
         return false;
     }
 
