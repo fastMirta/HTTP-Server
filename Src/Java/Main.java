@@ -5,7 +5,9 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-class Main{
+import Src.Java.Utils.Helper;
+
+public class Main{
 
     private final static int port = 4221;
     private final static String workingDirectory = "F:/MyServer";
@@ -16,7 +18,7 @@ class Main{
         //     System.out.println("Invalid HTTP version");
         //     return;
         // }
-        System.out.println("HTTP version is valid");
+
         try{
             ServerSocket server = new ServerSocket(port);
             System.out.println("server started");
@@ -36,9 +38,9 @@ class Main{
             }
 
             String[] requestLines = input.split("\r\n");
+            //TODO: handle main logic
             if(Helper.startsWithHTTPMethod(requestLines[0])){
                 System.out.println("Received request: " + Helper.getCurrentMethod());
-                String bodyParts = input.split("\r\n\r\n")[0];
                 //Helper.handleRequest(input, outputStream);
             }
             else{

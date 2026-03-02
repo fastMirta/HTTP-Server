@@ -1,5 +1,6 @@
-package Src.Java;
+package Src.Java.Utils;
 
+import Src.Java.Main;
 
 public class Helper {
     public enum HTTP_METHODS {
@@ -12,12 +13,12 @@ public class Helper {
         if(request == null){
             return false;
         }
-        else if(request.length() < 4){
+        else if(request.length() < 7){
             return false;
         }
         String echoString = request.substring(0,  6);
-        String echoMesage = request.substring(request.indexOf("echo") + 5, request.indexOf("HTTP"));
-        if(!echoString.equals("echo/") && !echoMesage.isEmpty()){
+        String echoMesage = request.substring(6);
+        if(!echoString.equals("/echo/") || echoMesage.isEmpty() || echoMesage.contains(" ")){
             outpotError = "Invalid echo parameter";
             return false;
         }
@@ -29,20 +30,11 @@ public class Helper {
      * @param request The HTTP request string to validate. This should be the part of the request line after the HTTP method, for example: "/path HTTP/1.1".
      * @return true if the request contains a valid path, false otherwise. If the path is invalid, an appropriate error message is set in the outpotError variable.
      */
-    public static boolean hasPath(String request) {
-        if(request == null){
+    public static boolean hasPath(String path) {
+        if(path == null){
             return false;
         }
-        else if(request.charAt(request.indexOf("/") + 1) == ' '){
-            outpotError = "Invalid path";
-            return false;
-        }
-        else if(hasMoreThanOneSpace(request)){
-            outpotError = "Invalid path: More than one space found";
-            return false;
-        }
-        String path = request.substring(request.indexOf("/") + 1, request.indexOf("HTTP"));
-        return !path.isEmpty();
+        return (!path.isEmpty() && !path.contains(" "));
     }
 
     public static HTTP_METHODS getMethod(String request) {
@@ -50,19 +42,19 @@ public class Helper {
             return null;
         }
         switch (request) {
-            case "GET /":
+            case "GET":
                 currentMethod = HTTP_METHODS.GET;
                 return HTTP_METHODS.GET;
-            case "POST /":
+            case "POST":
                 currentMethod = HTTP_METHODS.POST;
                 return HTTP_METHODS.POST;
-            case "PUT /":
+            case "PUT":
                 currentMethod = HTTP_METHODS.PUT;
                 return HTTP_METHODS.PUT;
-            case "DELETE /":
+            case "DELETE":
                 currentMethod = HTTP_METHODS.DELETE;
                 return HTTP_METHODS.DELETE;
-            case "PATCH /":
+            case "PATCH":
                 currentMethod = HTTP_METHODS.PATCH;
                 return HTTP_METHODS.PATCH;
             default:
@@ -166,10 +158,7 @@ public class Helper {
     // }
 
     public static boolean isValidHTTPSection(String request) {
-        if(request == null){
-            return false;
-        }
-        else if(isValidHTTPVersion(request)){
+        if(isValidHTTPVersion(request)){
             outpotError = "HTTP version not found";
             return false;
         }
@@ -202,10 +191,6 @@ public class Helper {
      * @return true if the request starts with a valid HTTP method, false otherwise.
      */
     public static boolean startsWithHTTPMethod(String request) {
-        if(request == null){
-            System.out.println("Request is null");
-            return false;
-        }
         String req = request.substring(0, request.indexOf("/")).trim();
         if(getMethod(req) != null){
             System.out.println("Request starts with HTTP method: " + req);

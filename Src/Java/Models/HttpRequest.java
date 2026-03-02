@@ -2,7 +2,7 @@ package Src.Java.Models;
 
 import java.util.HashMap;
 
-import Src.Java.Helper.HTTP_METHODS;
+import Src.Java.Utils.Helper.HTTP_METHODS;
 
 public class HttpRequest {
     private HTTP_METHODS method;
@@ -10,6 +10,13 @@ public class HttpRequest {
     private HashMap<String, String> headers;
     private String body;
 
+    /**
+     * 
+     * @param method
+     * @param path
+     * @param headers
+     * @param body
+     */
     public HttpRequest(HTTP_METHODS method, String path, HashMap<String, String> headers, String body) {
         this.method = method;
         this.path = path;

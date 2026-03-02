@@ -1,8 +1,12 @@
 package Src.Java;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
-import Src.Java.Helper.HTTP_METHODS;
+import Src.Java.Models.HttpRequest;
+import Src.Java.Utils.Helper;
 import Src.Java.Utils.ResponseBuilder;
+import Src.Java.Utils.Helper.HTTP_METHODS;
 
 public class Parser {
 
@@ -11,85 +15,38 @@ public class Parser {
      * @param request Full HTTP request string to parse and handle.
      * @throws IOException
      */
-    public static void parseRequest(String request) throws IOException {
-        if(!Helper.startsWithHTTPMethod(request)){
+    public static HttpRequest parseRequest(String request) throws IOException {
+        if(request == null || request.isEmpty()){
             //ResponseBuilder.sendResponse("HTTP/1.1 400 Bad Request\r\n\r\n Did not start with HTTP method");
-            return;
+            return null;
         }
-
-        else if(request == null || request.isEmpty()){
-            //ResponseBuilder.sendResponse("HTTP/1.1 400 Bad Request\r\n\r\n Request holds no content");
-            return;
+        else if(!Helper.isValidHTTPSection(request)){
+            return null;
         }
-
-        String methodString = request.substring(0, request.indexOf("/") + 1);
-        HTTP_METHODS method = Helper.getMethod(methodString);
-
-        if(method == null){return;}
-
-        switch (method) {
-            case GET:
-                int lastMethodCharIndex = request.indexOf("/");
-                String path = request.substring(lastMethodCharIndex, request.indexOf("\\r\\n\\r\\n")).trim();
-                parseGetRequest(path);
-                break;
-            case POST:
-                break;
-            case PUT:
-                break;
-            case DELETE:
-                break;
-            case PATCH:
-                break;
-        
-            default:
-                break;
+        String[] requestParts = request.split("\r\n");
+        String[] requestContents = requestParts[0].split(" ");
+        if(requestContents.length < 3){
+            //TODO: Call response builder with the Error message
+            return  null;
         }
+        HTTP_METHODS method = Helper.getMethod(requestContents[0]);
+
+        if(method == null){return null;}
+
+        HashMap<String, String> headers = new HashMap<>();
+        for(int i = 1; i < requestParts.length; i++){
+            if(requestParts[i].isEmpty()){
+                break;
+            }
+            String[] currentHeader = requestParts[i].split(": ", 2);
+            headers.put(currentHeader[0], currentHeader[1]);
+        }
+        //String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, World!";
+        //ResponseBuilder.sendResponse(response);
+
+
+        return new HttpRequest(method, requestContents[1], headers, requestParts[requestParts.length - 1]);
 
     }
 
-    /**
-     * 
-     * @param request The HTTP GET request string to parse and handle. The request is AFTER the method, for example: GET /path HTTP/1.1 -> the request parameter would be "/path HTTP/1.1"
-     *      
-     */
-    public static void parseGetRequest(String request)  {
-        if(!Helper.isValidHTTPSection(request)){
-            String response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\n" + Helper.getOutpotError();
-            //ResponseBuilder.sendResponse(response);
-            return;
-        }
-
-        else if(Helper.hasEcho(request)){
-            String echoMessage = request.substring(request.indexOf("echo") + 4, request.indexOf("HTTP")).trim();
-            String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n" + echoMessage;
-            //ResponseBuilder.sendResponse(response);
-            return;
-        }
-        else if(!Helper.getOutpotError().equals("")){
-            String response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\n" + Helper.getOutpotError();
-            //ResponseBuilder.sendResponse(response);
-            return;
-        }
-        else if(Helper.hasPath(request)){
-            //TODO: Check if the path is valid. 
-            String path = request.substring(request.indexOf("/") + 1, request.indexOf("HTTP")).trim();
-            String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nYou requested the path: " + path;
-            //ResponseBuilder.sendResponse(response);
-            return;
-        }
-        else{
-            String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, World!";
-            //ResponseBuilder.sendResponse(response);
-            return;
-        }
-    }
-
-    public static void parsePostRequest(String request) throws IOException {
-        if(!Helper.isValidHTTPSection(request)){
-            String response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\n" + Helper.getOutpotError();
-            //ResponseBuilder.sendResponse(response);
-            return;
-        }
-    }
 }

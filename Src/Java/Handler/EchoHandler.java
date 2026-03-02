@@ -4,7 +4,7 @@ import Src.Java.Models.HttpRequest;
 import Src.Java.Models.HttpResponse;
 
 public class EchoHandler implements Handler {
-
+    
     @Override
     public HttpResponse handleRequest(HttpRequest request) {
     //TODO: implement logic for other methods
@@ -23,5 +23,6 @@ public class EchoHandler implements Handler {
                 return null;
         }
     }
+    
     
 }
