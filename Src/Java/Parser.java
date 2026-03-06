@@ -1,7 +1,6 @@
 package Src.Java;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Map;
 
 import Src.Java.Models.HttpRequest;
 import Src.Java.Utils.Helper;
@@ -17,16 +16,15 @@ public class Parser {
      */
     public static HttpRequest parseRequest(String request) throws IOException {
         if(request == null || request.isEmpty()){
-            //ResponseBuilder.sendResponse("HTTP/1.1 400 Bad Request\r\n\r\n Did not start with HTTP method");
             return null;
         }
         else if(!Helper.isValidHTTPSection(request)){
             return null;
         }
+        
         String[] requestParts = request.split("\r\n");
         String[] requestContents = requestParts[0].split(" ");
         if(requestContents.length < 3){
-            //TODO: Call response builder with the Error message
             return  null;
         }
         HTTP_METHODS method = Helper.getMethod(requestContents[0]);
@@ -41,12 +39,8 @@ public class Parser {
             String[] currentHeader = requestParts[i].split(": ", 2);
             headers.put(currentHeader[0], currentHeader[1]);
         }
-        //String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, World!";
-        //ResponseBuilder.sendResponse(response);
-
 
         return new HttpRequest(method, requestContents[1], headers, requestParts[requestParts.length - 1]);
-
     }
 
 }

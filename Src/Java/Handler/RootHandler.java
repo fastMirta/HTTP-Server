@@ -21,6 +21,7 @@ public class RootHandler implements Handler {
                 return new HttpResponse(200, "OK", "text/plain", "Resource patched successfully.");
             default:
                 return new HttpResponse(405, "Method Not Allowed", "text/plain", "The requested method is not supported.");
+                //maybe change to null
         }
     }
     

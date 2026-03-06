@@ -10,15 +10,17 @@ public class EchoHandler implements Handler {
     //TODO: implement logic for other methods
         switch (request.getMethod()) {
             case GET:
-                return new HttpResponse(200, "OK", "text/plain", request.getPath());
+                return new HttpResponse(200, "OK",
+                 "text/plain", request.getPath().substring(6));
             case POST:
-                return null;
+                return new HttpResponse(200, "OK", "text/plain", request.getBody());
             case PUT:
-                return null;
+                return new HttpResponse(200, "OK", "text/plain", request.getBody());
             case DELETE:
-                return null;
+                return new HttpResponse(200, "OK", 
+                 "text/plain", request.getPath().substring(6, 0));
             case PATCH:
-                return null;
+                return new HttpResponse(200, "OK", "text/plain", request.getBody());
             default:
                 return null;
         }

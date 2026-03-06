@@ -1,5 +1,12 @@
 package Src.Java.Utils;
 
+
+import java.nio.file.Files;
+import java.nio.file.OpenOption;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+
 import Src.Java.Main;
 
 public class Helper {
@@ -7,6 +14,8 @@ public class Helper {
         GET, POST, PUT, DELETE, PATCH
     }
     private static String outpotError = "";
+    private static final long maxSize = 10L * 1024 * 1024 * 1024;
+
     public static HTTP_METHODS currentMethod;
 
     public static boolean hasEcho(String request) {
@@ -66,42 +75,7 @@ public class Helper {
         return currentMethod;
     }
 
-    // public static void handleRequest(String request, OutputStream outputStream) {
-    //     if(request == null){
-    //         return;
-    //     }
-    //     else if(!startsWithHTTPMethod(request)){
-    //         try{
-    //             outputStream.write("HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nBad Request".getBytes());
-    //             outputStream.flush();
-    //         }
-    //         catch(IOException e){
-    //             e.printStackTrace();
-    //         }
-    //         return;
-    //     }
-        
-    //     switch (currentMethod) {
-    //         case GET:
-    //             System.out.println("GET request received");
-    //             boolean success = handleGetMethod(request, outputStream);
-    //             break;
-    //         case POST:
-    //             System.out.println("POST request received");
-    //             break;
-    //         case PUT:
-    //             System.out.println("PUT request received");
-    //             break;
-    //         case DELETE:
-    //             System.out.println("DELETE request received");
-    //             break;
-    //         case PATCH:
-    //             System.out.println("PATCH request received");
-    //             break;
-    //         default:
-    //             break;
-    //     }
-    // }
+
 
     public static boolean isValidGetRequest(String request) {
         try{
@@ -114,32 +88,7 @@ public class Helper {
         }
     }
 
-    // public static boolean handleGetMethod(String request, OutputStream outputStream){
-    //     System.out.println("outputStream null? " + (outputStream == null));
-    //     try{
-            
-    //         if(request == null){
-    //             outputStream.write("HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nBad Request".getBytes());
-    //             outputStream.flush();
-    //             return false;
-    //         }
-    //         else if(hasEcho(request)){
-    //             String echoMessage = request.substring(request.indexOf("echo") + 4).trim();
-    //             String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\n" + echoMessage;
-    //             outputStream.write(response.getBytes());
-    //             outputStream.flush();
-    //             return true;
-    //         }
-    //         String response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, World!";
-    //         outputStream.write(response.getBytes());
-    //         outputStream.flush();
-    //         return true;
-    //     }
-    //     catch(IOException e){
-    //         e.printStackTrace();
-    //         return false;
-    //     }
-    // }
+
 
     /**Validates that there is exactly one space before the HTTP version in the request line. For example,
      * "GET / HTTP/1.1" is valid, but "GET /HTTP/1.1" and "GET /  HTTP/1.1" are not.
@@ -207,6 +156,7 @@ public class Helper {
      */
     public static boolean isValidHTTPVersion(String request) {
         if(request == null){
+            outpotError = "Didnt find HTTP version";
             return false;
         }
         else if(request.indexOf("HTTP/1.1") == -1){
@@ -227,6 +177,139 @@ public class Helper {
      */
     public static String getOutpotError() {
         return outpotError;
+    }
+
+    public static boolean isInDirectory(String path){
+        int index = path.indexOf("/");
+        String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
+        if(workingDirectory.equals("MyServer")){
+            outpotError = "File is not in the right directory";
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean isFileValid(String path, boolean isPost){
+        Path file = Paths.get(path);
+        if(!Files.isRegularFile(file) && !isPost){
+            outpotError = "File is not a regular file or doesnt exist";
+            return false;
+        }
+        else if(isPost && Files.exists(file)){
+            outpotError = "File already exists";
+            return false;
+        }
+
+        int index = path.indexOf("/");
+        String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
+        //TODO: put an actual directory
+        if(workingDirectory.equals("")){
+            outpotError = "File is not in the right directory";
+            return false;
+        }
+
+        return true;
+    }
+
+    //========= Handles methods =========
+
+    public static byte[] getFile(String path){
+        if(!isFileValid(path, false)){
+            return null;
+        }
+        Path file = Paths.get(path);
+        try {
+            return Files.readAllBytes(file);
+             
+        } catch (Exception e) {
+            // TODO: handle exception
+            outpotError = "Not found";
+            return null;
+        }
+        
+    }
+
+    public static boolean deleteFile(String path){
+        //TODO: create logic
+        if(!isFileValid(path, false)){
+            return false;
+        }
+        try {
+            Path file = Paths.get(path);
+            Files.delete(file);
+            
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            outpotError = e.getMessage();
+            return false;
+        }
+
+    }
+
+    /**Creates or Updates a file based on the data from the Post method
+     * 
+     * @param path
+     */
+    public static boolean postFile(String path, byte[] data){
+        //TODO: create logic
+        if(!isFileValid(path, true)){
+            return false;
+        }
+        Path file = Paths.get(path);
+        try {
+            Path filePath = Files.write(file, data);
+            return true;
+        } catch (Exception e) {
+            // TODO: handle exception
+            return false;
+        }
+    }
+
+    /**Replace or Creates a new resource
+     * 
+     * @param path
+     */
+    public static boolean putFile(String path, byte[] data){
+        //TODO: create logic
+        if(!isInDirectory(path)){
+            return false;
+        }
+        Path file = Paths.get(path);
+        try {
+            Path replace = Files.write(file, data);
+            return true;
+        } catch (Exception e) {
+            // TODO: handle exception
+            return false;
+        }
+    }
+
+    /**Adds partial data
+     * 
+     * @param path
+     */
+    public static boolean patchFile(String path, byte[] data){
+        //TODO: create logic
+        if(!isFileValid(path, false)){
+            return false;
+        }
+        Path file = Paths.get(path);
+        
+        
+        try {
+            if(Files.size(file) > maxSize ){
+                return false;
+            }
+            Path append = Files.write(file, data, StandardOpenOption.APPEND);
+            return true;
+        } catch (Exception e) {
+            // TODO: handle exception
+            outpotError = e.getMessage();
+            return false;
+        }
+        
     }
 
 }

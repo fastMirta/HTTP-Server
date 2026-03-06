@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 
 import Src.Java.Utils.Helper;
 
@@ -18,6 +19,12 @@ public class Main{
         //     System.out.println("Invalid HTTP version");
         //     return;
         // }
+        String hello = "hello world";
+        byte[] helloBytes = hello.getBytes();
+        for(byte by : helloBytes){
+            System.out.println("byte: " + by);
+        }
+        System.out.println("bytes to string" + Arrays.toString(helloBytes));
 
         try{
             ServerSocket server = new ServerSocket(port);
