@@ -4,7 +4,6 @@ import java.util.HashMap;
 
 import Src.Java.Models.HttpRequest;
 import Src.Java.Utils.Helper;
-import Src.Java.Utils.ResponseBuilder;
 import Src.Java.Utils.Helper.HTTP_METHODS;
 
 public class Parser {
@@ -15,22 +14,27 @@ public class Parser {
      * @throws IOException
      */
     public static HttpRequest parseRequest(String request) throws IOException {
+        System.out.println("Parsing Request!!!");
+        System.out.println("Request: " + request);
         if(request == null || request.isEmpty()){
             return null;
         }
         else if(!Helper.isValidHTTPSection(request)){
             return null;
         }
-        
+        System.out.println("Spliting initial request");
         String[] requestParts = request.split("\r\n");
+        System.out.println("spliting again!");
         String[] requestContents = requestParts[0].split(" ");
         if(requestContents.length < 3){
-            return  null;
+            return null;
         }
+        System.out.println("Getting method");
         HTTP_METHODS method = Helper.getMethod(requestContents[0]);
 
         if(method == null){return null;}
-
+        
+        System.out.println("Getting headers!!!");
         HashMap<String, String> headers = new HashMap<>();
         for(int i = 1; i < requestParts.length; i++){
             if(requestParts[i].isEmpty()){
@@ -39,7 +43,12 @@ public class Parser {
             String[] currentHeader = requestParts[i].split(": ", 2);
             headers.put(currentHeader[0], currentHeader[1]);
         }
-
+        System.out.println("Done!!! Parsing Request!!!");
+        System.out.println("method: " + method);
+        System.out.println("path: " + requestContents[1]);
+        System.out.println("headers: " + headers);
+        System.out.println("length: " + requestParts.length);
+        System.out.println("body: " + requestParts[requestParts.length - 1]);
         return new HttpRequest(method, requestContents[1], headers, requestParts[requestParts.length - 1]);
     }
 

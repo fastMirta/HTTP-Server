@@ -15,6 +15,8 @@ public class FileHandler implements Handler  {
 
         switch (request.getMethod()) {
             case GET:
+                System.out.println("handle request: " + request.getPath());
+                System.out.println("length: " + request.getPath().split("/").length);
                 String[] filePath = request.getPath().split("/");
                 String fileName = filePath[filePath.length - 1];
                 byte[] body = Helper.getFile(fileName);

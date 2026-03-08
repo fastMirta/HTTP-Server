@@ -1,12 +1,8 @@
 package Src.Java;
 
-import java.io.BufferedReader;
-import java.io.OutputStream;
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Arrays;
-
-import Src.Java.Utils.Helper;
 
 public class Main{
 
@@ -15,49 +11,31 @@ public class Main{
 
     public static void main(String[] args) {
         System.out.println("Lets Start the Server...");
-        // if(!Helper.hasSpaceBeforeHTTPVersion("GET / a HTTP/1.1")){
-        //     System.out.println("Invalid HTTP version");
-        //     return;
-        // }
-        String hello = "hello world";
-        byte[] helloBytes = hello.getBytes();
-        for(byte by : helloBytes){
-            System.out.println("byte: " + by);
-        }
-        System.out.println("bytes to string" + Arrays.toString(helloBytes));
-
+        ServerSocket server = null;
         try{
-            ServerSocket server = new ServerSocket(port);
+            server = new ServerSocket(port);
             System.out.println("server started");
-            Socket accept = server.accept();
-            System.out.println("client connected");
-            OutputStream outputStream = accept.getOutputStream();
-            BufferedReader bufferedReader = new BufferedReader(new java.io.InputStreamReader(accept.getInputStream()));
-            String input = bufferedReader.readLine(); 
-            System.out.println("Received: " + input);
-            StringBuilder readLine = new StringBuilder(bufferedReader.readLine());
-
-            while(readLine != null && !readLine.isEmpty()){
-                if(readLine != null){
-                    input += "\r\n" + readLine;
-                }
-                readLine.append(bufferedReader.readLine());
+            while(true){
+                Socket accept = server.accept();
+                System.out.println("client connected");
+                
+                ConnectionHandler connection = new ConnectionHandler(accept);
+                connection.run();
             }
-
-            String[] requestLines = input.split("\r\n");
-            //TODO: handle main logic
-            if(Helper.startsWithHTTPMethod(requestLines[0])){
-                System.out.println("Received request: " + Helper.getCurrentMethod());
-                //Helper.handleRequest(input, outputStream);
-            }
-            else{
-                outputStream.write("HTTP/1.1 400 Bad Request\r\n\r\n".getBytes());
-            }
-            
             
         }
         catch(Exception e){
             e.printStackTrace();
+        }
+        finally{
+            try {
+                if(server != null){
+                    server.close();
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
     }
 

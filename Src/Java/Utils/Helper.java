@@ -43,7 +43,8 @@ public class Helper {
         if(path == null){
             return false;
         }
-        return (!path.isEmpty() && !path.contains(" "));
+        boolean containsLetters = path.toLowerCase().contains("abcdefghijklmnopqrstuvwxyz");
+        return (!path.isEmpty() && !path.contains(" ") && containsLetters);
     }
 
     public static HTTP_METHODS getMethod(String request) {
@@ -77,16 +78,6 @@ public class Helper {
 
 
 
-    public static boolean isValidGetRequest(String request) {
-        try{
-            String currentDir = System.getProperty(Main.getWorkingDirectory());
-            return true;
-        }
-        catch(Exception e){
-            e.printStackTrace();
-            return false;
-        }
-    }
 
 
 
@@ -107,14 +98,19 @@ public class Helper {
     // }
 
     public static boolean isValidHTTPSection(String request) {
-        if(isValidHTTPVersion(request)){
+        System.out.println("validating http");
+        if(!isValidHTTPVersion(request)){
+            System.out.println("Not Valid");
             outpotError = "HTTP version not found";
             return false;
         }
-        else if(!hasMoreThanOneSpace(request)){
+        else if(hasMoreThanOneSpace(request)){
+            System.out.println(request);
+            System.out.println("No space valid");
             outpotError = "More than one space found";
             return false;
         }
+        System.out.println("DONE!!! validating http");
         return true;
     }
 
@@ -163,11 +159,15 @@ public class Helper {
             outpotError = "HTTP version not found";
             return false;
         }
-        String version = request.substring(request.indexOf("HTTP/"), request.indexOf("\r\n"));
+        System.out.println("Extracting version");
+        System.out.println("start index: " + request.indexOf("HTTP/") + " end index: " + (request.indexOf("1")+3));
+        String version = request.substring(request.indexOf("HTTP/"), request.indexOf("1") + 3);
+        System.out.println("version: " + version);
         if(!version.equals("HTTP/1.1")){
             outpotError = "Invalid HTTP version: " + version;
             return false;
         }
+        System.out.println("VALIDDD!!");
         return true;
     }
 
@@ -182,7 +182,7 @@ public class Helper {
     public static boolean isInDirectory(String path){
         int index = path.indexOf("/");
         String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
-        if(workingDirectory.equals("MyServer")){
+        if(workingDirectory.equals(Main.getWorkingDirectory())){
             outpotError = "File is not in the right directory";
             return false;
         }

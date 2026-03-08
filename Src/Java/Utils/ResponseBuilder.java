@@ -9,9 +9,7 @@ import Src.Java.Models.HttpResponse;
 public class ResponseBuilder {
 
 
-    public ResponseBuilder(){
-       
-    }
+    public ResponseBuilder(){}
 
     public String sendResponse(HttpResponse response){
         if(response == null){
@@ -21,6 +19,7 @@ public class ResponseBuilder {
             responseBuilder.append("HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusMessage() + "\r\n");
             responseBuilder.append("Content-Type: " + response.getContentType() + "\r\n");
             responseBuilder.append("Content-Length: " + response.getBody().getBytes().length + "\r\n");
+            responseBuilder.append("\r\n");
             responseBuilder.append(response.getBody());
         return responseBuilder.toString();
     }
