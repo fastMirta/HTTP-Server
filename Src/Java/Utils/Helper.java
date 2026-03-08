@@ -6,6 +6,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.util.Arrays;
 
 import Src.Java.Main;
 
@@ -43,8 +44,12 @@ public class Helper {
         if(path == null){
             return false;
         }
-        boolean containsLetters = path.toLowerCase().contains("abcdefghijklmnopqrstuvwxyz");
-        return (!path.isEmpty() && !path.contains(" ") && containsLetters);
+        //boolean containsLetters = path.toLowerCase().contains("abcdefghijklmnopqrstuvwxyz");
+        System.out.println("PATH: " + path);
+        //System.out.println("contains letter: " + containsLetters);
+        System.out.println("isnt empty: " + !path.isEmpty());
+        System.out.println("doesnt contains space?: " + !path.contains(" "));
+        return (!path.isEmpty() && !path.contains(" ") );
     }
 
     public static HTTP_METHODS getMethod(String request) {
@@ -191,18 +196,25 @@ public class Helper {
     }
 
     public static boolean isFileValid(String path, boolean isPost){
+        System.out.println("B4 file path");
+        System.out.println("path: " + path);
         Path file = Paths.get(path);
+        System.out.println("after file path");
         if(!Files.isRegularFile(file) && !isPost){
+            System.out.println("is post is false");
             outpotError = "File is not a regular file or doesnt exist";
             return false;
         }
         else if(isPost && Files.exists(file)){
+            System.out.println("Entered exists");
             outpotError = "File already exists";
             return false;
         }
-
+        System.out.println("INDEXING");
         int index = path.indexOf("/");
+        System.out.println("index: " + index);
         String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
+        System.out.println("after working directory");
         //TODO: put an actual directory
         if(workingDirectory.equals("")){
             outpotError = "File is not in the right directory";
@@ -254,15 +266,24 @@ public class Helper {
      */
     public static boolean postFile(String path, byte[] data){
         //TODO: create logic
+        System.out.println("Post path: " + path);
+        System.out.println("data: " + Arrays.toString(data));
         if(!isFileValid(path, true)){
+            System.out.println("Entered post file validation");
             return false;
         }
+        
         Path file = Paths.get(path);
         try {
+            System.out.println("b4 writing data");
+            System.out.println("file path: " + file.toString());
+            System.out.println("data: " + Arrays.toString(data));
             Path filePath = Files.write(file, data);
+            System.out.println("after writing");
             return true;
         } catch (Exception e) {
             // TODO: handle exception
+            System.out.println("got error on file things");
             return false;
         }
     }
