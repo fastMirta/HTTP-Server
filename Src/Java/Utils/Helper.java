@@ -49,7 +49,7 @@ public class Helper {
         //System.out.println("contains letter: " + containsLetters);
         System.out.println("isnt empty: " + !path.isEmpty());
         System.out.println("doesnt contains space?: " + !path.contains(" "));
-        return (!path.isEmpty() && !path.contains(" ") );
+        return (!path.isEmpty() && !path.contains(" ") && !path.equals("/"));
     }
 
     public static HTTP_METHODS getMethod(String request) {
