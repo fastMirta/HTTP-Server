@@ -36,11 +36,14 @@ public class Parser {
         
         System.out.println("Getting headers!!!");
         HashMap<String, String> headers = new HashMap<>();
+        System.out.println("request parts length: " + requestParts.length);
         for(int i = 1; i < requestParts.length; i++){
             if(requestParts[i].isEmpty()){
+                System.out.println("Empty");
                 break;
             }
             String[] currentHeader = requestParts[i].split(": ", 2);
+            System.out.println("current header: " + currentHeader[0] + " second: " + currentHeader[1]);
             headers.put(currentHeader[0], currentHeader[1]);
         }
         System.out.println("Done!!! Parsing Request!!!");

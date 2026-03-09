@@ -20,7 +20,7 @@ public class Main{
                 System.out.println("client connected");
                 
                 ConnectionHandler connection = new ConnectionHandler(accept);
-                connection.run();
+                new Thread(connection).start();
             }
             
         }

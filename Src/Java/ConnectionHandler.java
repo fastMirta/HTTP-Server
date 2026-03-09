@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.Arrays;
 
 import Src.Java.Handler.Handler;
 import Src.Java.Models.HttpRequest;
@@ -17,6 +18,7 @@ public class ConnectionHandler implements Runnable{
         this.clientSocket = clientSocket;
     }
 
+
     @Override
     public void run() {
         try {
@@ -25,12 +27,29 @@ public class ConnectionHandler implements Runnable{
             String line = bufferedReader.readLine();
             StringBuilder input = new StringBuilder();
             System.out.println("B4 getting lines");
-            while (line != null && !line.isEmpty() ) {
-                input.append(line);
+            String contentLength = "";
+            while (line != null && !line.isEmpty()) {
+                if(line.contains("Content-Length")){
+                    contentLength = line;
+                    System.out.println("line: " + line);
+                }
+                input.append(line).append("\r\n");
                 line = bufferedReader.readLine();
             }
-            System.out.println("After getting them");
+            input.append("\r\n");
+
+            if(contentLength.split(":").length == 2){
+                
+                int charactersToRead = Integer.parseInt(contentLength.split(":")[1].trim());
+                //System.out.println("After getting them");
+                char[] body = new char[charactersToRead];
+                bufferedReader.read(body, 0, charactersToRead);
+                input.append(body);
+                System.out.println("body in start: " + Arrays.toString(body));
+            }
+
             String clientInput = input.toString();
+            
             HttpRequest request = Parser.parseRequest(clientInput);
             if(request == null){
                 HttpResponse response = new HttpResponse(400, "Bad Request", "text/plain", Helper.getOutpotError());
