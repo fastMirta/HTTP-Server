@@ -1,5 +1,6 @@
 package Src.Java.Handler;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -19,15 +20,10 @@ public class FileHandler implements Handler  {
         }
         switch (request.getMethod()) {
             case GET:
-                System.out.println("handle request: " + request.getPath());
-                System.out.println("length: " + request.getPath().split("/").length);
-                String[] filePath = request.getPath().split("/");
-                String fileName = filePath[filePath.length - 1];
-                System.out.println("File name: " + fileName);
-                byte[] body = Helper.getFile(fileName);
+                byte[] body = Helper.getFile(path);
                 if(body != null){
                     return new HttpResponse(200, "OK", 
-                 "text/plain", Arrays.toString(body));
+                 "text/plain", new String(body, StandardCharsets.UTF_8));
                 }
                 return new HttpResponse(404, "Not found", "text/plain", Helper.getOutpotError());
             case POST:

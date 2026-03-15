@@ -18,7 +18,7 @@ public class EchoHandler implements Handler {
                 return new HttpResponse(200, "OK", "text/plain", request.getBody());
             case DELETE:
                 return new HttpResponse(200, "OK", 
-                 "text/plain", request.getPath().substring(6, 0));
+                 "text/plain", request.getPath().substring(6, request.getPath().length()));
             case PATCH:
                 return new HttpResponse(200, "OK", "text/plain", request.getBody());
             default:

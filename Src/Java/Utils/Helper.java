@@ -106,7 +106,7 @@ public class Helper {
         System.out.println("validating http");
         if(!isValidHTTPVersion(request)){
             System.out.println("Not Valid");
-            outpotError = "HTTP version not found";
+            //outpotError = "HTTP version not found";
             return false;
         }
         else if(hasMoreThanOneSpace(request)){
@@ -160,16 +160,20 @@ public class Helper {
             outpotError = "Didnt find HTTP version";
             return false;
         }
+        
         else if(request.indexOf("HTTP/1.1") == -1){
             outpotError = "HTTP version not found";
             return false;
         }
         System.out.println("Extracting version");
+        String httpSection = request.substring(request.indexOf("HTTP/1.1"));
+        System.out.println("last index: " + (httpSection.length() - 1));
+        String fullHttpSection = httpSection.substring(0, httpSection.indexOf("1.1") + 4).trim();
         System.out.println("start index: " + request.indexOf("HTTP/") + " end index: " + (request.indexOf("1")+3));
-        String version = request.substring(request.indexOf("HTTP/"), request.indexOf("1") + 3);
-        System.out.println("version: " + version);
-        if(!version.equals("HTTP/1.1")){
-            outpotError = "Invalid HTTP version: " + version;
+        //String version = request.substring(request.indexOf("HTTP/"), request.indexOf("1") + 3);
+        System.out.println("version: " + fullHttpSection);
+        if(!fullHttpSection.equals("HTTP/1.1")){
+            outpotError = "Invalid HTTP version: " + fullHttpSection;
             return false;
         }
         System.out.println("VALIDDD!!");
@@ -200,6 +204,7 @@ public class Helper {
         System.out.println("path: " + path);
         Path file = Paths.get(path);
         System.out.println("after file path");
+        System.out.println("is exists: " + Files.exists(file));
         if(!Files.isRegularFile(file) && !isPost){
             System.out.println("is post is false");
             outpotError = "File is not a regular file or doesnt exist";

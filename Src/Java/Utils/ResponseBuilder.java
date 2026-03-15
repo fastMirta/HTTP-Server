@@ -12,7 +12,7 @@ public class ResponseBuilder {
     public ResponseBuilder(){}
 
     public String sendResponse(HttpResponse response){
-        if(response == null){
+        if(response == null || response.getBody() == null){
             return null;
         }
         StringBuilder responseBuilder = new StringBuilder();
@@ -23,6 +23,6 @@ public class ResponseBuilder {
             responseBuilder.append(response.getBody());
         return responseBuilder.toString();
     }
-
+    
 
 }
