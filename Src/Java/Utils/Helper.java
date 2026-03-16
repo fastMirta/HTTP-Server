@@ -19,20 +19,19 @@ public class Helper {
 
     public static HTTP_METHODS currentMethod;
 
-    public static boolean hasEcho(String request) {
+    public static Result<Void> hasEcho(String request) {
         if(request == null){
-            return false;
+            return Result.failure("Request null");
         }
         else if(request.length() < 7){
-            return false;
+            return Result.failure("Request Too short");
         }
         String echoString = request.substring(0,  6);
         String echoMesage = request.substring(6);
         if(!echoString.equals("/echo/") || echoMesage.isEmpty() || echoMesage.contains(" ")){
-            outpotError = "Invalid echo parameter";
-            return false;
+            return Result.failure("Invalid echo parameter");
         }
-        return true;
+        return Result.success(null);
     }
 
     /**Validates that the request contains a path after the HTTP method and before the HTTP version. For example, in "GET /path HTTP/1.1", the path is "/path". The method checks that there is a non-empty path and that it does not contain invalid characters or multiple spaces.
@@ -161,8 +160,12 @@ public class Helper {
             return false;
         }
         
-        else if(request.indexOf("HTTP/1.1") == -1){
+        else if(request.indexOf("HTTP/") == -1){
             outpotError = "HTTP version not found";
+            return false;
+        }
+        else if(request.indexOf("HTTP/1.1") == -1){
+            outpotError = "505 Unsupported Http version";
             return false;
         }
         System.out.println("Extracting version");
@@ -200,11 +203,8 @@ public class Helper {
     }
 
     public static boolean isFileValid(String path, boolean isPost){
-        System.out.println("B4 file path");
-        System.out.println("path: " + path);
         Path file = Paths.get(path);
-        System.out.println("after file path");
-        System.out.println("is exists: " + Files.exists(file));
+
         if(!Files.isRegularFile(file) && !isPost){
             System.out.println("is post is false");
             outpotError = "File is not a regular file or doesnt exist";
@@ -231,36 +231,34 @@ public class Helper {
 
     //========= Handles methods =========
 
-    public static byte[] getFile(String path){
+    public static Result<byte[]> getFile(String path){
         if(!isFileValid(path, false)){
-            return null;
+            return Result.failure(outpotError);
         }
         Path file = Paths.get(path);
         try {
-            return Files.readAllBytes(file);
+            byte[] data = Files.readAllBytes(file);
+            return Result.success(data);
              
         } catch (Exception e) {
-            // TODO: handle exception
-            outpotError = "Not found";
-            return null;
+            return Result.failure("Not found");
+            
         }
         
     }
 
-    public static boolean deleteFile(String path){
+    public static Result<Void> deleteFile(String path){
         //TODO: create logic
         if(!isFileValid(path, false)){
-            return false;
+            return Result.failure(outpotError);
         }
         try {
             Path file = Paths.get(path);
             Files.delete(file);
-            
-            return true;
+            return Result.success(null);
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            outpotError = e.getMessage();
-            return false;
+            return Result.failure(e.getMessage());
         }
 
     }
@@ -269,13 +267,12 @@ public class Helper {
      * 
      * @param path
      */
-    public static boolean postFile(String path, byte[] data){
+    public static Result<Void> postFile(String path, byte[] data){
         //TODO: create logic
         System.out.println("Post path: " + path);
         System.out.println("data: " + Arrays.toString(data));
         if(!isFileValid(path, true)){
-            System.out.println("Entered post file validation");
-            return false;
+            return Result.failure(outpotError);
         }
         
         Path file = Paths.get(path);
@@ -285,11 +282,11 @@ public class Helper {
             System.out.println("data: " + Arrays.toString(data));
             Path filePath = Files.write(file, data);
             System.out.println("after writing");
-            return true;
+            return Result.success(null);
         } catch (Exception e) {
             // TODO: handle exception
             System.out.println("got error on file things");
-            return false;
+            return Result.failure(e.getMessage());
         }
     }
 
@@ -297,18 +294,18 @@ public class Helper {
      * 
      * @param path
      */
-    public static boolean putFile(String path, byte[] data){
+    public static Result<Void> putFile(String path, byte[] data){
         //TODO: create logic
         if(!isInDirectory(path)){
-            return false;
+            return Result.failure(outpotError);
         }
         Path file = Paths.get(path);
         try {
             Path replace = Files.write(file, data);
-            return true;
+            return Result.success(null);
         } catch (Exception e) {
             // TODO: handle exception
-            return false;
+            return Result.failure(e.getMessage());
         }
     }
 
@@ -316,24 +313,23 @@ public class Helper {
      * 
      * @param path
      */
-    public static boolean patchFile(String path, byte[] data){
+    public static Result<Void> patchFile(String path, byte[] data){
         //TODO: create logic
+        
         if(!isFileValid(path, false)){
-            return false;
+            return Result.failure(outpotError);
         }
         Path file = Paths.get(path);
         
         
         try {
             if(Files.size(file) > maxSize ){
-                return false;
+                return Result.failure("File is too large");
             }
             Path append = Files.write(file, data, StandardOpenOption.APPEND);
-            return true;
+            return Result.success(null);
         } catch (Exception e) {
-            // TODO: handle exception
-            outpotError = e.getMessage();
-            return false;
+            return Result.failure(e.getMessage());
         }
         
     }

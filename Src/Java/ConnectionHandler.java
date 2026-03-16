@@ -58,10 +58,19 @@ public class ConnectionHandler implements Runnable{
             }
             else{
                 Handler router = Router.routing(request);
-                HttpResponse serverRespone = router.handleRequest(request);
                 ResponseBuilder builder = new ResponseBuilder();
+                if(router == null){
+                    HttpResponse serverResponse = new HttpResponse(400, "Bad Request",
+                 "text/plain", Helper.hasEcho(clientInput).getError());
+                    clienOutputStream.write(builder.sendResponse(serverResponse).getBytes());
+                }
+                else{
+                HttpResponse serverResponse = router.handleRequest(request);
+                
                 //System.out.println("response: " + builder.sendResponse(serverRespone));
-                clienOutputStream.write(builder.sendResponse(serverRespone).getBytes());
+                clienOutputStream.write(builder.sendResponse(serverResponse).getBytes());
+                }
+
             }
 
         } catch (IOException e) {
