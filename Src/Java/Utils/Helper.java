@@ -24,14 +24,28 @@ public class Helper {
             return Result.failure("Request null");
         }
         else if(request.length() < 7){
+            System.out.println("Request too short: " + request);
             return Result.failure("Request Too short");
         }
+        System.out.println("REQUESRT BESTY: " + request);
         String echoString = request.substring(0,  6);
         String echoMesage = request.substring(6);
-        if(!echoString.equals("/echo/") || echoMesage.isEmpty() || echoMesage.contains(" ")){
+        String regEx = "abcdefghijklmnopqrstuvwxyz";
+        System.out.println("ECHO PATH: " + echoString);
+        if(!echoString.equals("/echo/")){
+            return Result.failure("Request dont have echo");
+        }
+        else if(echoMesage.isEmpty() || echoMesage.contains(" ")){
             return Result.failure("Invalid echo parameter");
         }
-        return Result.success(null);
+        char[] characters = echoMesage.toCharArray();
+        for(char c : characters){
+            System.out.println(regEx.indexOf(echoString));
+            if(regEx.indexOf(c) != -1 || regEx.toUpperCase().indexOf(c) != -1){
+                return Result.success(null);
+            }
+        }
+        return Result.failure("Echo must contain letters");
     }
 
     /**Validates that the request contains a path after the HTTP method and before the HTTP version. For example, in "GET /path HTTP/1.1", the path is "/path". The method checks that there is a non-empty path and that it does not contain invalid characters or multiple spaces.
@@ -39,16 +53,26 @@ public class Helper {
      * @param request The HTTP request string to validate. This should be the part of the request line after the HTTP method, for example: "/path HTTP/1.1".
      * @return true if the request contains a valid path, false otherwise. If the path is invalid, an appropriate error message is set in the outpotError variable.
      */
-    public static boolean hasPath(String path) {
+    public static Result<Void> hasPath(String path) {
         if(path == null){
-            return false;
+            return Result.failure("Path is null");
+        }
+        else if(path.trim().equals("/")){
+            return Result.failure("Dont have path");
         }
         //boolean containsLetters = path.toLowerCase().contains("abcdefghijklmnopqrstuvwxyz");
         System.out.println("PATH: " + path);
         //System.out.println("contains letter: " + containsLetters);
         System.out.println("isnt empty: " + !path.isEmpty());
         System.out.println("doesnt contains space?: " + !path.contains(" "));
-        return (!path.isEmpty() && !path.contains(" ") && !path.equals("/"));
+        if(path.trim().equals("/")){
+            Result.failure("Dont have path"); //shouldnt be an error cuz it just will be root
+        }
+        if((path.isEmpty() || path.contains(" "))){
+            Result.failure("Invalid path");
+        }
+        System.out.println("path equals / " + path.trim().equals("/"));
+        return Result.success(null);
     }
 
     public static HTTP_METHODS getMethod(String request) {

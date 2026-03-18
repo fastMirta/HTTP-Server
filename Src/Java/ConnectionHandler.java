@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 
+import Src.Java.Handler.ErrorHandler;
 import Src.Java.Handler.Handler;
 import Src.Java.Models.HttpRequest;
 import Src.Java.Models.HttpResponse;
@@ -57,15 +58,17 @@ public class ConnectionHandler implements Runnable{
                 clienOutputStream.write(builder.sendResponse(response).getBytes());
             }
             else{
-                Handler router = Router.routing(request);
+                String[] requestParts = clientInput.split("\r\n");
+                String[] requestContents = requestParts[0].split(" ");
+                Handler handler = Router.routing(request);
                 ResponseBuilder builder = new ResponseBuilder();
-                if(router == null){
+                if(handler instanceof ErrorHandler){
                     HttpResponse serverResponse = new HttpResponse(400, "Bad Request",
-                 "text/plain", Helper.hasEcho(clientInput).getError());
+                 "text/plain", ((ErrorHandler) handler).getError());
                     clienOutputStream.write(builder.sendResponse(serverResponse).getBytes());
                 }
                 else{
-                HttpResponse serverResponse = router.handleRequest(request);
+                HttpResponse serverResponse = handler.handleRequest(request);
                 
                 //System.out.println("response: " + builder.sendResponse(serverRespone));
                 clienOutputStream.write(builder.sendResponse(serverResponse).getBytes());

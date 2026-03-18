@@ -2,6 +2,7 @@ package Src.Java;
 
 import Src.Java.Handler.EchoHandler;
 import Src.Java.Handler.FileHandler;
+import Src.Java.Handler.ErrorHandler;
 import Src.Java.Handler.Handler;
 import Src.Java.Handler.RootHandler;
 import Src.Java.Models.HttpRequest;
@@ -16,17 +17,24 @@ public class Router {
             return new EchoHandler();
         }
         else if(echoResult.getError().equals("Invalid echo parameter") || echoResult.getError().equals("Request null")
-            || echoResult.getError().equals("Request Too short")
+            // || echoResult.getError().equals("Request Too short")
         ){
-            return null;
+            return new ErrorHandler(echoResult.getError());
         }
-        else if(Helper.hasPath(request.getPath())){
-            System.out.println("error: " + echoResult.getError());
-            System.out.println(echoResult.getError().equals("Invalid echo parameter"));
-            System.out.println(Helper.getOutpotError().equals("Invalid echo parameter"));
+        else if(echoResult.getError().equals("Echo must contain letters")){
+            return new ErrorHandler(echoResult.getError());
+        }
+        Result<Void> pathResult = Helper.hasPath(request.getPath());
+        System.out.println(pathResult.isSuccess());
+        if(pathResult.isSuccess()){
+            System.out.println("error: " + pathResult.getError());
+            System.out.println(pathResult.getError().equals("Invalid path"));
             System.out.println("router path: " + request.getPath());
             System.out.println("routing file");
             return new FileHandler();
+        }
+        else if(pathResult.getError().equals("Invalid path")){
+            return new ErrorHandler(pathResult.getError());
         }
         System.out.println("routing root");
         return new RootHandler();
