@@ -1,4 +1,4 @@
-package Src.Java.Models;
+package com.tamir.Models;
 
 public class HttpResponse {
     private int statusCode;

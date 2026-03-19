@@ -1,13 +1,13 @@
-package Src.Java;
+package com.tamir;
 
-import Src.Java.Handler.EchoHandler;
-import Src.Java.Handler.FileHandler;
-import Src.Java.Handler.ErrorHandler;
-import Src.Java.Handler.Handler;
-import Src.Java.Handler.RootHandler;
-import Src.Java.Models.HttpRequest;
-import Src.Java.Utils.Helper;
-import Src.Java.Utils.Result;
+import com.tamir.Handler.EchoHandler;
+import com.tamir.Handler.ErrorHandler;
+import com.tamir.Handler.FileHandler;
+import com.tamir.Handler.Handler;
+import com.tamir.Handler.RootHandler;
+import com.tamir.Models.HttpRequest;
+import com.tamir.Utils.Helper;
+import com.tamir.Utils.Result;
 
 public class Router {
     public static Handler routing(HttpRequest request){

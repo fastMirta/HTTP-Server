@@ -1,8 +1,8 @@
-package Src.Java.Models;
+package com.tamir.Models;
 
 import java.util.HashMap;
 
-import Src.Java.Utils.Helper.HTTP_METHODS;
+import com.tamir.Utils.Helper.HTTP_METHODS;
 
 public class HttpRequest {
     private HTTP_METHODS method;

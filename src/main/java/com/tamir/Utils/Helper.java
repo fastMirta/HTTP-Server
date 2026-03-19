@@ -1,18 +1,39 @@
-package Src.Java.Utils;
+package com.tamir.Utils;
 
 
 import java.nio.file.Files;
-import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import Src.Java.Main;
+import com.tamir.Main;
 
 public class Helper {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
     public enum HTTP_METHODS {
         GET, POST, PUT, DELETE, PATCH
+    }
+    public enum ERRORS {
+        
+        ECHO_INVALID_PARAM,
+        ECHO_MUST_CONTAIN_LETTERS,
+        ECHO_TOO_SHORT,
+        REQUEST_NULL,
+        INVALID_PATH,
+
+        // File errors
+        FILE_NOT_FOUND,
+        FILE_ALREADY_EXISTS,
+        FILE_TOO_LARGE,
+        
+        // HTTP errors
+        INVALID_HTTP_VERSION,
+        UNSUPPORTED_HTTP_VERSION,
+        METHOD_NOT_ALLOWED
     }
     private static String outpotError = "";
     private static final long maxSize = 10L * 1024 * 1024 * 1024;
@@ -58,20 +79,16 @@ public class Helper {
             return Result.failure("Path is null");
         }
         else if(path.trim().equals("/")){
-            return Result.failure("Dont have path");
+            return Result.failure("Dont have path"); //shouldnt be an error cuz it just will be root
         }
         //boolean containsLetters = path.toLowerCase().contains("abcdefghijklmnopqrstuvwxyz");
         System.out.println("PATH: " + path);
         //System.out.println("contains letter: " + containsLetters);
         System.out.println("isnt empty: " + !path.isEmpty());
         System.out.println("doesnt contains space?: " + !path.contains(" "));
-        if(path.trim().equals("/")){
-            Result.failure("Dont have path"); //shouldnt be an error cuz it just will be root
-        }
         if((path.isEmpty() || path.contains(" "))){
-            Result.failure("Invalid path");
+            return Result.failure("Invalid path");
         }
-        System.out.println("path equals / " + path.trim().equals("/"));
         return Result.success(null);
     }
 
@@ -126,7 +143,8 @@ public class Helper {
     // }
 
     public static boolean isValidHTTPSection(String request) {
-        System.out.println("validating http");
+        logger.debug("validating http...");
+        logger.debug("request: " + request);
         if(!isValidHTTPVersion(request)){
             System.out.println("Not Valid");
             //outpotError = "HTTP version not found";
@@ -136,6 +154,7 @@ public class Helper {
             System.out.println(request);
             System.out.println("No space valid");
             outpotError = "More than one space found";
+            logger.error("More than one space found");
             return false;
         }
         System.out.println("DONE!!! validating http");
@@ -143,6 +162,10 @@ public class Helper {
     }
 
     public static boolean hasMoreThanOneSpace(String request) {
+        if(request == null){
+            return false;
+        }
+        
         int counter = 0;
         for(int i = 0; i < request.length(); i++){
             if(request.charAt(i) == ' '){
@@ -152,9 +175,8 @@ public class Helper {
                 break;
             }
         }
-        if(request == null || counter == 0){
-            return false;
-        }
+        if(counter == 0){return false;}
+        
         return counter > 1;
     }
 
@@ -186,6 +208,7 @@ public class Helper {
         
         else if(request.indexOf("HTTP/") == -1){
             outpotError = "HTTP version not found";
+            logger.error("HTTP version not found");
             return false;
         }
         else if(request.indexOf("HTTP/1.1") == -1){
@@ -198,6 +221,14 @@ public class Helper {
         String fullHttpSection = httpSection.substring(0, httpSection.indexOf("1.1") + 4).trim();
         System.out.println("start index: " + request.indexOf("HTTP/") + " end index: " + (request.indexOf("1")+3));
         //String version = request.substring(request.indexOf("HTTP/"), request.indexOf("1") + 3);
+        String http = request.substring(request.indexOf("HTTP/"));
+        String anotherHttpSection = http.substring(4);
+        System.out.println("ANOTHER HTTP: " + anotherHttpSection);
+        if(anotherHttpSection.indexOf("HTTP/") != -1){
+            logger.error("Cant have more than 1 http protocol signal");
+            outpotError = "Cant have more than 1 http protocol signal";
+            return false;
+        }
         System.out.println("version: " + fullHttpSection);
         if(!fullHttpSection.equals("HTTP/1.1")){
             outpotError = "Invalid HTTP version: " + fullHttpSection;
@@ -218,7 +249,7 @@ public class Helper {
     public static boolean isInDirectory(String path){
         int index = path.indexOf("/");
         String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
-        if(workingDirectory.equals(Main.getWorkingDirectory())){
+        if(!workingDirectory.equals(Main.getWorkingDirectory())){
             outpotError = "File is not in the right directory";
             return false;
         }

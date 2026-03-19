@@ -1,7 +1,7 @@
-package Src.Java.Handler;
+package com.tamir.Handler;
 
-import Src.Java.Models.HttpRequest;
-import Src.Java.Models.HttpResponse;
+import com.tamir.Models.HttpRequest;
+import com.tamir.Models.HttpResponse;
 
 public class ErrorHandler implements Handler {
 

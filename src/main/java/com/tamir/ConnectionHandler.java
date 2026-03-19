@@ -1,4 +1,4 @@
-package Src.Java;
+package com.tamir;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -6,33 +6,36 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Arrays;
 
-import Src.Java.Handler.ErrorHandler;
-import Src.Java.Handler.Handler;
-import Src.Java.Models.HttpRequest;
-import Src.Java.Models.HttpResponse;
-import Src.Java.Utils.Helper;
-import Src.Java.Utils.ResponseBuilder;
+import com.tamir.Handler.ErrorHandler;
+import com.tamir.Handler.Handler;
+import com.tamir.Models.HttpRequest;
+import com.tamir.Models.HttpResponse;
+import com.tamir.Utils.Helper;
+import com.tamir.Utils.ResponseBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+//src.main.java.com.tamir.
 public class ConnectionHandler implements Runnable{
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
     Socket clientSocket;
     public ConnectionHandler(Socket clientSocket){
         this.clientSocket = clientSocket;
     }
 
-
+    //curl http://localhost:4221/test/HTTP/1.1/test.txt
     @Override
     public void run() {
         try {
+            Thread.sleep(3000);
             OutputStream clienOutputStream = clientSocket.getOutputStream();
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             String line = bufferedReader.readLine();
             StringBuilder input = new StringBuilder();
-            System.out.println("B4 getting lines");
             String contentLength = "";
             while (line != null && !line.isEmpty()) {
                 if(line.contains("Content-Length")){
                     contentLength = line;
-                    System.out.println("line: " + line);
                 }
                 input.append(line).append("\r\n");
                 line = bufferedReader.readLine();
@@ -46,7 +49,6 @@ public class ConnectionHandler implements Runnable{
                 char[] body = new char[charactersToRead];
                 bufferedReader.read(body, 0, charactersToRead);
                 input.append(body);
-                System.out.println("body in start: " + Arrays.toString(body));
             }
 
             String clientInput = input.toString();
@@ -55,11 +57,23 @@ public class ConnectionHandler implements Runnable{
             if(request == null){
                 HttpResponse response = new HttpResponse(400, "Bad Request", "text/plain", Helper.getOutpotError());
                 ResponseBuilder builder = new ResponseBuilder();
-                clienOutputStream.write(builder.sendResponse(response).getBytes());
+                String serversResponse = builder.sendResponse(response);
+                if(serversResponse == null){
+                    StringBuilder responseBuilder = new StringBuilder();
+                    responseBuilder.append("HTTP/1.1 " + response.getStatusCode() + " " + response.getStatusMessage() + "\r\n");
+                    responseBuilder.append("Content-Type: " + response.getContentType() + "\r\n");
+                    responseBuilder.append("Content-Length: " + response.getBody().getBytes().length + "\r\n");
+                    responseBuilder.append("\r\n");
+                    responseBuilder.append(response.getBody());
+                    clienOutputStream.write(responseBuilder.toString().getBytes());
+                    
+                    return;
+                }
+                clienOutputStream.write(serversResponse.getBytes());
             }
             else{
-                String[] requestParts = clientInput.split("\r\n");
-                String[] requestContents = requestParts[0].split(" ");
+                // String[] requestParts = clientInput.split("\r\n");
+                // String[] requestContents = requestParts[0].split(" ");
                 Handler handler = Router.routing(request);
                 ResponseBuilder builder = new ResponseBuilder();
                 if(handler instanceof ErrorHandler){
@@ -86,6 +100,9 @@ public class ConnectionHandler implements Runnable{
             } catch (IOException e1) {
                 e1.printStackTrace();
             }
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
         finally {
             try {

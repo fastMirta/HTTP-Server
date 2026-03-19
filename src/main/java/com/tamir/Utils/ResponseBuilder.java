@@ -1,8 +1,7 @@
-package Src.Java.Utils;
+package com.tamir.Utils;
 
-import java.net.Socket;
 
-import Src.Java.Models.HttpResponse;
+import com.tamir.Models.HttpResponse;
 
 
 //TODO This class will be responsible for building the response to be sent to the client. It will take care of setting the appropriate headers, status codes, and body content based on the request and the server's logic. This will help in keeping the code organized and maintainable as the server grows in complexity.

@@ -1,4 +1,4 @@
-package Src.Java.Utils;
+package com.tamir.Utils;
 
 public class Result<T> {
     private String result = "";

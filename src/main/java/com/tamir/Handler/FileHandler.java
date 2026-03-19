@@ -1,16 +1,12 @@
-package Src.Java.Handler;
+package com.tamir.Handler;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.sql.ResultSet;
-import java.util.Arrays;
 
-import Src.Java.Main;
-import Src.Java.Models.HttpRequest;
-import Src.Java.Models.HttpResponse;
-import Src.Java.Utils.Helper;
-import Src.Java.Utils.Result;
+import com.tamir.Main;
+import com.tamir.Models.HttpRequest;
+import com.tamir.Models.HttpResponse;
+import com.tamir.Utils.Helper;
+import com.tamir.Utils.Result;
 
 public class FileHandler implements Handler  {
 

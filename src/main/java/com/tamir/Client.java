@@ -1,4 +1,4 @@
-package Src.Java;
+package com.tamir;
 
 import java.io.BufferedOutputStream;
 import java.net.Socket;

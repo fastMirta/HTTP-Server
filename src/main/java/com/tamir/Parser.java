@@ -1,32 +1,37 @@
-package Src.Java;
+package com.tamir;
 import java.io.IOException;
 import java.util.HashMap;
 
-import Src.Java.Models.HttpRequest;
-import Src.Java.Utils.Helper;
-import Src.Java.Utils.Helper.HTTP_METHODS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.tamir.Models.HttpRequest;
+import com.tamir.Utils.Helper;
+import com.tamir.Utils.Helper.HTTP_METHODS;
 
 public class Parser {
-
+    private static final Logger logger = LoggerFactory.getLogger(Parser.class);
     /**Parses the incoming HTTP request and validates it. If the request is valid, it will be handled accordingly. If the request is invalid, an appropriate error response will be sent back to the client.
      * 
      * @param request Full HTTP request string to parse and handle.
      * @throws IOException
      */
     public static HttpRequest parseRequest(String request) throws IOException {
-        System.out.println("Parsing Request!!!");
-        System.out.println("Request: " + request);
+        logger.info("Started Parsing");
+        logger.debug("Parsing request: " + request);
         if(request == null || request.isEmpty()){
+            logger.error("request is null or empty");
             return null;
         }
         else if(!Helper.isValidHTTPSection(request)){
             return null;
         }
-        System.out.println("Spliting initial request");
+        logger.debug("Spliting initial request");
         String[] requestParts = request.split("\r\n");
-        System.out.println("spliting again!");
+        logger.debug("spliting again!");
         String[] requestContents = requestParts[0].split(" ");
         if(requestContents.length < 3){
+            logger.error("RequestContents length less than three");
             return null;
         }
         System.out.println("Getting method");
