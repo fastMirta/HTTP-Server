@@ -20,13 +20,13 @@ public class Main{
 
 
     public static void main(String[] args) {
-        System.out.println("Lets Start the Server...");
+        logger.info("\n Lets Start the Server...");
         ServerSocket server = null;
         ExecutorService pool = Executors.newFixedThreadPool(2);
         
         try{
             server = new ServerSocket(port);
-            System.out.println("server started");
+            logger.debug("server started");
             while(true){
                 Socket accept = server.accept();
                 logger.info("Cliend connected");
@@ -40,6 +40,7 @@ public class Main{
                     running.incrementAndGet();
                     
                     System.out.println("waiting: " + waiting.get() + " running: " + running.get());
+                    logger.debug("waiting: " + waiting.get() + " running: " + running.get());
                     
                     connection.run();
                     
@@ -54,9 +55,11 @@ public class Main{
         finally{
             try {
                 if(server != null){
+                    logger.info("Closing server");
                     server.close();
                 }
             } catch (IOException e) {
+                logger.error("Caught IO exception in closing server: " + e.getMessage());
                 e.printStackTrace();
             }
         }

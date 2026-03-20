@@ -23,7 +23,6 @@ public class ConnectionHandler implements Runnable{
         this.clientSocket = clientSocket;
     }
 
-    //curl http://localhost:4221/test/HTTP/1.1/test.txt
     @Override
     public void run() {
         try {
@@ -91,23 +90,25 @@ public class ConnectionHandler implements Runnable{
             }
 
         } catch (IOException e) {
-            // TODO: handle exception
-            e.printStackTrace();
+            logger.error("Caught IO exception in ConnectionHandler", e);
+            logger.debug("error: " + e.getMessage());
             HttpResponse response = new HttpResponse(500, "Internal Server Error", "text/plain", null);
             ResponseBuilder builder = new ResponseBuilder();
             try {
                 clientSocket.getOutputStream().write(builder.sendResponse(response).getBytes());
             } catch (IOException e1) {
                 e1.printStackTrace();
+                logger.error("Caught IO exception while trying to write a response");
             }
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
+            logger.error("Caught Interrupted exception: " + e.getMessage());
             e.printStackTrace();
         }
         finally {
             try {
                 clientSocket.close();
             } catch (IOException e) {
+                logger.error("Caught IO exception while closing client");
                 e.printStackTrace();
             }
         }

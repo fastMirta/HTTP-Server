@@ -23,7 +23,7 @@ public class Parser {
             logger.error("request is null or empty");
             return null;
         }
-        else if(!Helper.isValidHTTPSection(request)){
+        else if(!Helper.isValidHTTPSection(request).isSuccess()){
             return null;
         }
         logger.debug("Spliting initial request");
