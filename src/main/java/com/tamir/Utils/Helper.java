@@ -38,7 +38,6 @@ public class Helper {
     private static String outpotError = "";
     private static final long maxSize = 10L * 1024 * 1024 * 1024;
 
-    public static HTTP_METHODS currentMethod;
 
     public static Result<Void> hasEcho(String request) {
         if(request == null){
@@ -98,28 +97,21 @@ public class Helper {
         }
         switch (request) {
             case "GET":
-                currentMethod = HTTP_METHODS.GET;
                 return HTTP_METHODS.GET;
             case "POST":
-                currentMethod = HTTP_METHODS.POST;
                 return HTTP_METHODS.POST;
             case "PUT":
-                currentMethod = HTTP_METHODS.PUT;
                 return HTTP_METHODS.PUT;
             case "DELETE":
-                currentMethod = HTTP_METHODS.DELETE;
                 return HTTP_METHODS.DELETE;
             case "PATCH":
-                currentMethod = HTTP_METHODS.PATCH;
                 return HTTP_METHODS.PATCH;
             default:
                 return null;
         }
     }
 
-    public static HTTP_METHODS getCurrentMethod() {
-        return currentMethod;
-    }
+
 
 
     public static Result<Void> isValidHTTPSection(String request) {
@@ -130,7 +122,7 @@ public class Helper {
             System.out.println("Not Valid");
             return httpVersionRes;
         }
-        Result<Void> hasMoreSpaceRes = hasMoreThanOneSpace(request);
+        Result<Void> hasMoreSpaceRes = hasSpaces(request);
         if(hasMoreSpaceRes.isSuccess()){
             logger.debug(request);
             logger.error("Error in isValidHTTPSection" + hasMoreSpaceRes.getError());
@@ -143,11 +135,11 @@ public class Helper {
     /**
      * 
      * @param request HTTP request
-     * @return Result of type void with success if no more than 1 space found else failure
+     * @return Result of type void with success if no more than 0 space found else failure
      */
-    public static Result<Void> hasMoreThanOneSpace(String request) {
+    public static Result<Void> hasSpaces(String request) {
         if(request == null){
-            logger.error("Request is null in hasMoreThanOneSpace");
+            logger.error("Request is null in hasSpaces");
             return Result.failure("request is null");
         }
         
@@ -160,7 +152,7 @@ public class Helper {
                 break;
             }
         }
-        if(counter == 0){return Result.failure("Doesnt have more than 1 space");}
+        if(counter == 0){return Result.failure("Request Has space/s");}
         
         return Result.success(null);
     }
@@ -258,7 +250,7 @@ public class Helper {
         logger.debug("workingDirectory: " + workingDirectory);
         logger.debug("path: " + path);
         logger.debug("after working directory");
-        if(workingDirectory.equals(Main.getWorkingDirectory())){
+        if(!workingDirectory.equals(Main.getWorkingDirectory())){
             outpotError = "File is not in the right directory";
             logger.error("File is not in the right directory");
             return false;

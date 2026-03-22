@@ -34,29 +34,30 @@ public class Parser {
             logger.error("RequestContents length less than three");
             return null;
         }
-        System.out.println("Getting method");
+        logger.debug("Getting method");
         HTTP_METHODS method = Helper.getMethod(requestContents[0]);
 
         if(method == null){return null;}
         
-        System.out.println("Getting headers!!!");
+        logger.info("Getting headers!!!");
         HashMap<String, String> headers = new HashMap<>();
-        System.out.println("request parts length: " + requestParts.length);
+        logger.debug("request parts length: " + requestParts.length);
         for(int i = 1; i < requestParts.length; i++){
             if(requestParts[i].isEmpty()){
                 System.out.println("Empty");
                 break;
             }
             String[] currentHeader = requestParts[i].split(": ", 2);
-            System.out.println("current header: " + currentHeader[0] + " second: " + currentHeader[1]);
+            logger.debug("current header: " + currentHeader[0] + " second: " + currentHeader[1]);
             headers.put(currentHeader[0], currentHeader[1]);
         }
-        System.out.println("Done!!! Parsing Request!!!");
-        System.out.println("method: " + method);
-        System.out.println("path: " + requestContents[1]);
-        System.out.println("headers: " + headers);
-        System.out.println("length: " + requestParts.length);
-        System.out.println("body: " + requestParts[requestParts.length - 1]);
+
+        logger.debug("Done!!! Parsing Request!!!");
+        logger.debug("method: " + method);
+        logger.debug("path: " + requestContents[1]);
+        logger.debug("headers: " + headers);
+        logger.debug("length: " + requestParts.length);
+        logger.debug("body: " + requestParts[requestParts.length - 1]);
         return new HttpRequest(method, requestContents[1], headers, requestParts[requestParts.length - 1]);
     }
 
