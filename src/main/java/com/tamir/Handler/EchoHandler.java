@@ -8,7 +8,6 @@ public class EchoHandler implements Handler {
     
     @Override
     public HttpResponse handleRequest(HttpRequest request) {
-    //TODO: implement logic for other methods
         switch (request.getMethod()) {
             case GET:
                 return new HttpResponse(200, "OK",
@@ -19,7 +18,7 @@ public class EchoHandler implements Handler {
                 return new HttpResponse(200, "OK", "text/plain", request.getBody());
             case DELETE:
                 return new HttpResponse(200, "OK", 
-                 "text/plain", request.getPath().substring(6, request.getPath().length()));
+                 "text/plain", request.getPath().substring(6));
             case PATCH:
                 return new HttpResponse(200, "OK", "text/plain", request.getBody());
             default:

@@ -1,12 +1,19 @@
 package com.tamir;
 
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,6 +23,7 @@ public class Main{
     private final static String workingDirectory = "F:/MyServer";
     private static AtomicInteger waiting = new AtomicInteger(0);
     private static AtomicInteger running = new AtomicInteger(0);
+    private static String keysPw = System.getenv("KEYSTORE_PASSWORD");
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
 
@@ -23,9 +31,19 @@ public class Main{
         logger.info("\n Lets Start the Server...");
         ServerSocket server = null;
         ExecutorService pool = Executors.newFixedThreadPool(2);
-        
-        try{
-            server = new ServerSocket(port);
+        if(keysPw == null){
+            logger.error("KEYSTORE_PASSWORD env variable not set");
+            return;
+        }
+        try(FileInputStream keyStoreFile = new FileInputStream("HTTP-Server/keystore.p12")){
+            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            keyStore.load(keyStoreFile, keysPw.toCharArray());
+            KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+            kmf.init(keyStore, keysPw.toCharArray());
+
+            SSLContext sslContext = SSLContext.getInstance("TLS");
+            sslContext.init(kmf.getKeyManagers(), null, null);
+            server = sslContext.getServerSocketFactory().createServerSocket(port);
             logger.debug("server started");
             while(true){
                 Socket accept = server.accept();
@@ -49,8 +67,11 @@ public class Main{
             }
             
         }
+        catch(KeyStoreException e){
+            logger.error("Caught KeyStoreException: " + e.getMessage());
+        }
         catch(Exception e){
-            e.printStackTrace();
+            logger.error("Caught exception: " + e.getMessage());
         }
         finally{
             try {

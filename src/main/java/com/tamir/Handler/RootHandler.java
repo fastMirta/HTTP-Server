@@ -8,6 +8,7 @@ public class RootHandler implements Handler {
 
     @Override
     public HttpResponse handleRequest(HttpRequest request) {
+        //TODO: add logger
         switch (request.getMethod()) {
             case GET:
                 System.out.println("in get");
@@ -27,7 +28,7 @@ public class RootHandler implements Handler {
             default:
                 System.out.println("not allowed");
                 return new HttpResponse(405, "Method Not Allowed", "text/plain", "The requested method is not supported.");
-                //maybe change to null
+                
         }
     }
     

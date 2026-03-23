@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.tamir.Main;
 
 public class Helper {
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    private static final Logger logger = LoggerFactory.getLogger(Helper.class);
 
     public enum HTTP_METHODS {
         GET, POST, PUT, DELETE, PATCH
@@ -119,7 +119,6 @@ public class Helper {
         logger.debug("request: " + request);
         Result<Void> httpVersionRes = isValidHTTPVersion(request);
         if(!httpVersionRes.isSuccess()){
-            System.out.println("Not Valid");
             return httpVersionRes;
         }
         Result<Void> hasMoreSpaceRes = hasSpaces(request);
@@ -152,7 +151,7 @@ public class Helper {
                 break;
             }
         }
-        if(counter == 0){return Result.failure("Request Has space/s");}
+        if(counter > 0){return Result.failure("Request Has space/s");}
         
         return Result.success(null);
     }
@@ -179,6 +178,7 @@ public class Helper {
      */
     public static Result<Void> isValidHTTPVersion(String request) {
         if(request == null){
+            logger.error("Didnt find HTTP version");
             return Result.failure("Didnt find HTTP version");
         }
         
@@ -187,7 +187,7 @@ public class Helper {
             return Result.failure("HTTP version not found");
         }
         else if(request.indexOf("HTTP/1.1") == -1){
-            outpotError = "505 Unsupported Http version";
+            logger.error("505 Unsupported Http version");
             return Result.failure("505 Unsupported Http version");
         }
         System.out.println("Extracting version");
@@ -204,7 +204,6 @@ public class Helper {
         }
         logger.debug("version: " + fullHttpSection);
         if(!fullHttpSection.equals("HTTP/1.1")){
-            outpotError = "Invalid HTTP version: " + fullHttpSection;
             return Result.failure("Invalid HTTP version: " + fullHttpSection);
         }
         logger.debug("Valid");
@@ -219,29 +218,27 @@ public class Helper {
         return outpotError;
     }
 
-    public static boolean isInDirectory(String path){
+    public static Result<Void> isInDirectory(String path){
         int index = path.indexOf("/");
         String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
         if(!workingDirectory.equals(Main.getWorkingDirectory())){
-            outpotError = "File is not in the right directory";
-            return false;
+            logger.debug("File isnt in the right directory");
+            return Result.failure("File is not in the right directory");
         }
 
-        return true;
+        return Result.success(null);
     }
 
-    public static boolean isFileValid(String path, boolean isPost){
+    public static Result<Void> isFileValid(String path, boolean isPost){
         Path file = Paths.get(path);
 
         if(!Files.isRegularFile(file) && !isPost){
-            outpotError = "File is not a regular file or doesnt exist";
             logger.error("File is not a regular file or doesnt exist");
-            return false;
+            return Result.failure("File is not a regular file or doesnt exist");
         }
         else if(isPost && Files.exists(file)){
-            outpotError = "File already exists";
             logger.error("File already exists");
-            return false;
+            return Result.failure("File already exists");
         }
         logger.debug("INDEXING");
         int index = path.indexOf("/", path.indexOf("/") + 1);
@@ -251,20 +248,21 @@ public class Helper {
         logger.debug("path: " + path);
         logger.debug("after working directory");
         if(!workingDirectory.equals(Main.getWorkingDirectory())){
-            outpotError = "File is not in the right directory";
+            //outpotError = "File is not in the right directory";
             logger.error("File is not in the right directory");
-            return false;
+            return Result.failure("File is not in the right directory");
         }
 
-        return true;
+        return Result.success(null);
     }
 
     //========= Handles methods =========
 
     public static Result<byte[]> getFile(String path){
         logger.info("getting file");
-        if(!isFileValid(path, false)){
-            return Result.failure(outpotError);
+        Result<Void> fileValidationRes = isFileValid(path, false);
+        if(!fileValidationRes.isSuccess()){
+            return Result.failure(fileValidationRes.getError());
         }
         Path file = Paths.get(path);
         try {
@@ -280,8 +278,9 @@ public class Helper {
 
     public static Result<Void> deleteFile(String path){
         logger.info("Deleting file");
-        if(!isFileValid(path, false)){
-            return Result.failure(outpotError);
+        Result<Void> fileValidationRes = isFileValid(path, false);
+        if(!fileValidationRes.isSuccess()){
+            return fileValidationRes;
         }
         try {
             Path file = Paths.get(path);
@@ -303,8 +302,9 @@ public class Helper {
         logger.info("Posting file");
         logger.debug("Post path: " + path);
         logger.debug("data: " + Arrays.toString(data));
-        if(!isFileValid(path, true)){
-            return Result.failure(outpotError);
+        Result<Void> fileValidationRes = isFileValid(path, true);
+        if(!fileValidationRes.isSuccess()){
+            return fileValidationRes;
         }
         
         Path file = Paths.get(path);
@@ -327,8 +327,9 @@ public class Helper {
      */
     public static Result<Void> putFile(String path, byte[] data){
         logger.info("Putting file");
-        if(!isInDirectory(path)){
-            return Result.failure(outpotError);
+        Result<Void> inDirResult = isInDirectory(path);
+        if(!inDirResult.isSuccess()){
+            return inDirResult;
         }
         Path file = Paths.get(path);
         try {
@@ -347,9 +348,9 @@ public class Helper {
      */
     public static Result<Void> patchFile(String path, byte[] data){
         logger.info("Patching file");
-        
-        if(!isFileValid(path, false)){
-            return Result.failure(outpotError);
+        Result<Void> fileValidationRes = isFileValid(path, true);
+        if(!fileValidationRes.isSuccess()){
+            return fileValidationRes;
         }
         Path file = Paths.get(path);
         
