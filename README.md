@@ -92,6 +92,6 @@ Client → ConnectionHandler → Parser → Router → Handler → ResponseBuild
 ## Known Limitations
 
 - Uses a self-signed certificate — browsers will show a security warning
-- Working directory for file operations is hardcoded in `Main.java`
+- Working directory depends on having a WORKING_DIRECTORY env variable
 - Supports HTTP/1.1 only
 - Thread pool is fixed at 2 threads
