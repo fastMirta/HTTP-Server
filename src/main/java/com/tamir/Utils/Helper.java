@@ -17,6 +17,8 @@ public class Helper {
     public enum HTTP_METHODS {
         GET, POST, PUT, DELETE, PATCH
     }
+
+    //TODO: use errors enum to check certain errors
     public enum ERRORS {
         
         ECHO_INVALID_PARAM,
@@ -229,6 +231,13 @@ public class Helper {
         return Result.success(null);
     }
 
+    /**Validate file if hes a real file and exists in the directory unless expects to be in post where
+     * it creates a new file
+     * 
+     * @param path path of the file. example: C:/http_test/text.txt
+     * @param isPost expects to be called from post method
+     * @return Result<Void> of success or failure
+     */
     public static Result<Void> isFileValid(String path, boolean isPost){
         Path file = Paths.get(path);
 
@@ -348,7 +357,7 @@ public class Helper {
      */
     public static Result<Void> patchFile(String path, byte[] data){
         logger.info("Patching file");
-        Result<Void> fileValidationRes = isFileValid(path, true);
+        Result<Void> fileValidationRes = isFileValid(path, false);
         if(!fileValidationRes.isSuccess()){
             return fileValidationRes;
         }

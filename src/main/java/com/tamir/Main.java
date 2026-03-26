@@ -7,6 +7,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -77,6 +78,7 @@ public class Main{
             try {
                 if(server != null){
                     logger.info("Closing server");
+                    logger.debug("Closing server");
                     server.close();
                 }
             } catch (IOException e) {
