@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class Main{
 
     private final static int port = 4221;
-    private final static String workingDirectory = "F:/MyServer";
+    private final static String workingDirectory = System.getenv("WORKING_DIRECTORY");;
     private static AtomicInteger waiting = new AtomicInteger(0);
     private static AtomicInteger running = new AtomicInteger(0);
     private static String keysPw = System.getenv("KEYSTORE_PASSWORD");
@@ -34,6 +34,10 @@ public class Main{
         ExecutorService pool = Executors.newFixedThreadPool(2);
         if(keysPw == null){
             logger.error("KEYSTORE_PASSWORD env variable not set");
+            return;
+        }
+        if(workingDirectory == null){
+            logger.error("WORKING_DIRECTORY env variable isnt set");
             return;
         }
         try(FileInputStream keyStoreFile = new FileInputStream("HTTP-Server/keystore.p12")){

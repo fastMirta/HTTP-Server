@@ -124,7 +124,7 @@ public class Helper {
             return httpVersionRes;
         }
         Result<Void> hasMoreSpaceRes = hasSpaces(request);
-        if(hasMoreSpaceRes.isSuccess()){
+        if(!hasMoreSpaceRes.isSuccess()){
             logger.debug(request);
             logger.error("Error in isValidHTTPSection" + hasMoreSpaceRes.getError());
             return hasMoreSpaceRes;
@@ -221,9 +221,9 @@ public class Helper {
     }
 
     public static Result<Void> isInDirectory(String path){
-        int index = path.indexOf("/");
-        String workingDirectory = path.substring(index, path.indexOf("/", index + 1));
-        if(!workingDirectory.equals(Main.getWorkingDirectory())){
+        Path file = Paths.get(path).normalize();
+        Path workingDirectory = Paths.get(Main.getWorkingDirectory()).normalize();
+        if(!file.startsWith(workingDirectory)){
             logger.debug("File isnt in the right directory");
             return Result.failure("File is not in the right directory");
         }
@@ -239,7 +239,7 @@ public class Helper {
      * @return Result<Void> of success or failure
      */
     public static Result<Void> isFileValid(String path, boolean isPost){
-        Path file = Paths.get(path);
+        Path file = Paths.get(path).normalize();
 
         if(!Files.isRegularFile(file) && !isPost){
             logger.error("File is not a regular file or doesnt exist");
@@ -249,15 +249,8 @@ public class Helper {
             logger.error("File already exists");
             return Result.failure("File already exists");
         }
-        logger.debug("INDEXING");
-        int index = path.indexOf("/", path.indexOf("/") + 1);
-        logger.debug("index: " + index);
-        String workingDirectory = path.substring(0, index);
-        logger.debug("workingDirectory: " + workingDirectory);
-        logger.debug("path: " + path);
-        logger.debug("after working directory");
-        if(!workingDirectory.equals(Main.getWorkingDirectory())){
-            //outpotError = "File is not in the right directory";
+        Path workingDirectory = Paths.get(Main.getWorkingDirectory()).normalize();
+        if(!file.startsWith(workingDirectory)){
             logger.error("File is not in the right directory");
             return Result.failure("File is not in the right directory");
         }
